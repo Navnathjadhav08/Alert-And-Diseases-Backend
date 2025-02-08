@@ -6,7 +6,7 @@ const fs = require('fs');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require("dotenv").config();
 
-const cors = require('cors');
+
 
 app.use(cors({
     origin: '*', // Allow all origins
