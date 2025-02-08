@@ -158,6 +158,53 @@ const sendNotification = async (email, mobile, message) => {
     }
 };
 
+
+// ---------- 7Days Weather Forecast ----------
+app.get('/api/forecast', async (req, res) => {
+    try {
+        const { lat, lon } = req.query;
+
+        if (!lat || !lon) {
+            return res.status(400).json({
+                success: false,
+                error: 'Please provide latitude and longitude parameters'
+            });
+        }
+
+        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,relative_humidity_2m_mean&forecast_days=7&timezone=auto`;
+        
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.reason || 'Failed to fetch weather data');
+        }
+
+        const forecast = data.daily.time.map((date, index) => ({
+            date,
+            temperature_max: data.daily.temperature_2m_max[index],
+            temperature_min: data.daily.temperature_2m_min[index],
+            precipitation: data.daily.precipitation_sum[index],
+            humidity: data.daily.relative_humidity_2m_mean[index],
+            weather_code: data.daily.weather_code[index]
+        }));
+
+        res.json({
+            success: true,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            forecast
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+
 // ---------- Core Logic ----------
 app.post('/irrigation-check', async (req, res) => {
     try {
