@@ -6,6 +6,8 @@ const fs = require('fs');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require("dotenv").config();
 
+const app = express();
+app.use(express.json());
 
 
 app.use(cors({
@@ -16,9 +18,7 @@ app.use(cors({
 }));
 
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+
 
 const PORT = process.env.PORT || 3000;
 const EXTERNAL_NOTIFICATION_URL = "https://simple-sms-email-system.onrender.com/notifications/send";
