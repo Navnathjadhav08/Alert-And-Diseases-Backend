@@ -149,6 +149,7 @@ const getPrecipitation = async (lat, lon) => {
 };
 
 const sendNotification = async (email, mobile, message) => {
+    mobile = "+91"+mobile;
     try {
         await axios.post(EXTERNAL_NOTIFICATION_URL, { email, mobile, message });
         return true;
@@ -215,7 +216,7 @@ app.post('/irrigation-check', async (req, res) => {
             current_soil_moisture: currentMoisturePercent, // Expecting in percentage (0-100%)
             latitude: lat,
             longitude: lon,
-            mobile_number: "+91"+mobile,
+            mobile_number: mobile,
             email_address: email
         } = req.body;
 
