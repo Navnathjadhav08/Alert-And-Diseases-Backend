@@ -40,38 +40,60 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 app.use(express.json());
 
 // Disease prediction endpoint
-app.post('/predict-diseases', async (req, res) => {
+app.post("/predict-diseases", async (req, res) => {
     try {
         const { crop_name, crop_age } = req.body;
 
-        if (!crop_name || !crop_age ) {
+        if (!crop_name || !crop_age) {
             return res.status(400).json({ error: "Missing required parameters" });
         }
 
-        // Create the prompt dynamically
-        const prompt = `Predict three possible diseases for ${crop_name} at age ${crop_age} days `
-            + `Provide symptoms and prevention methods for each disease in JSON format & Language English & Marathi both One By One.`;
+        // AI Prompt
+        const prompt = `
+        Predict three possible diseases for ${crop_name} at age ${crop_age} days. 
+        Provide symptoms and prevention methods in JSON format without code block formatting.
+        Ensure response follows:
+        {
+          "diseases": [
+            {
+              "name": "Disease Name",
+              "symptoms": "English symptoms",
+              "prevention": "English prevention",
+              "marathi_translation": {
+                "नाव": "Disease Name",
+                "लक्षणे": "Marathi symptoms",
+                "प्रतिबंध": "Marathi prevention"
+              }
+            }
+          ]
+        } in Marathi translation name,symotoms,prevention word also in Marathi.
+        `;
 
-        // Generate AI response
+        // Generate AI Response
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
+        let responseText = result.response.text();
 
-        // Try parsing JSON response
+        // Remove unwanted code block formatting (` ```json `)
+        responseText = responseText.replace(/^```json\n/, "").replace(/\n```$/, "");
+
         let diseases = [];
         try {
             diseases = JSON.parse(responseText);
         } catch (error) {
-            console.warn("Response is not valid JSON, returning raw text");
+            console.warn("Invalid JSON response from Gemini AI, returning raw text.");
+            return res.status(500).json({ error: "Invalid AI Response", rawResponse: responseText });
         }
 
-        res.json({ diseases: diseases.length ? diseases : responseText });
+        // Return structured response
+        res.json({ diseases });
 
     } catch (error) {
         console.error("Error predicting diseases:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 
 
 
