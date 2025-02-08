@@ -215,7 +215,7 @@ app.post('/irrigation-check', async (req, res) => {
             current_soil_moisture: currentMoisturePercent, // Expecting in percentage (0-100%)
             latitude: lat,
             longitude: lon,
-            mobile_number: mobile,
+            mobile_number: "+91"+mobile,
             email_address: email
         } = req.body;
 
@@ -254,7 +254,9 @@ app.post('/irrigation-check', async (req, res) => {
         const precipitation = await getPrecipitation(lat, lon);
 
         // Calculate water needed for irrigation
-        const waterNeeded = (deficit + requiredIrrigation - precipitation > 0) ? (deficit + requiredIrrigation - precipitation) : 0;
+
+    
+    const waterNeeded = (deficit + requiredIrrigation - precipitation > 0) ? (deficit + requiredIrrigation - precipitation) : 0;
         const needsIrrigation = (waterNeeded > 0) && (currentMoisture < optimalMin);
 
         // Send notifications if irrigation is needed
